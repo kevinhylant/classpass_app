@@ -1,1 +1,1 @@
-# classpass_app
+Decided to create an API endpoint using a lightweight Ruby framework called Sinatra
