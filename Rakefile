@@ -7,3 +7,21 @@ task :console, :environment do |t, args|
  
   exec "irb -r irb/completion -r './app'"
 end
+
+desc "seed database"
+namespace :db do
+  task :seed, :environment do |t, args|
+    ENV['RACK_ENV'] = args[:environment] || 'development'
+    MyFactory.seed_database('small')
+  end
+end
+
+desc "drop database"
+namespace :db do
+  task :drop, :environment do |t, args|
+    ENV['RACK_ENV'] = args[:environment] || 'development'
+    ActiveRecord::Base.subclasses.each(&:delete_all)
+  end
+end
+
+

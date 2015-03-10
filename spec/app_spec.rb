@@ -5,7 +5,7 @@ describe "Homepage" do
     get '/'
   end
 
-  it "returns a 200 status code" do
+  xit "returns a 200 status code" do
     expect(last_response.status).to eq(200)
   end
 end

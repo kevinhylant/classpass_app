@@ -1,5 +1,40 @@
 class MyFactory
 
+  def self.seed_database(size)
+
+    if size == 'small'
+      studio_count = 3
+      classes_per_studio = 2
+      num_scheduled_per_clss = 2
+      instructor_count = 10
+      user_count = 30
+      scheduled_class_count = studio_count*classes_per_studio*num_scheduled_per_clss
+      class_ratings_count = 2*scheduled_class_count
+      favorites_count = user_count*2
+    elsif size == 'medium'
+      studio_count = 40
+      classes_per_studio = 3
+      num_scheduled_per_clss = 8
+      instructor_count = 60
+      user_count = 150
+      scheduled_class_count = studio_count*classes_per_studio*num_scheduled_per_clss
+      class_ratings_count = 2*scheduled_class_count
+      favorites_count = user_count*2
+    end
+    activities = ['spin','strength_training','barre','yoga','dance','pilates']
+
+    studios = MyFactory.create_and_return_studios(studio_count)
+    instructors = MyFactory.create_and_return_instructors(instructor_count)
+    clsses = MyFactory.create_and_return_clsses(studios,classes_per_studio)
+    scheduled_classes = MyFactory.create_and_return_scheduled_classes(clsses,instructors,num_scheduled_per_clss)
+    users = MyFactory.create_and_return_users(user_count)
+    activity_types = MyFactory.assign_and_return_activity_types(clsses,activities)
+    MyFactory.assign_class_ratings(scheduled_classes, users, class_ratings_count)
+    MyFactory.assign_favorite_studios(studios,users,favorites_count)
+    MyFactory.assign_user_preferences(users)
+
+  end
+
   def self.create_and_return_instructors(num)
     num.times do
       Instructor.create(:first_name => Faker::Name.first_name,
@@ -89,7 +124,6 @@ class MyFactory
       params = Preference.generate_params
       u.create_preference(params)
     end
-
   end
 
 end

@@ -9,8 +9,8 @@ require 'rubygems'
 require 'factory_girl'
 require 'database_cleaner'
 require 'faker'
+require './environment.rb'
 
-require './app.rb'
 Dir["./models/*.rb"].each {|file| require file }
 # Dir["./spec/factories/*.rb"].each {|file| require file }
 
@@ -45,7 +45,6 @@ class App < Sinatra::Base
   # end
 
   post "/studio" do
-    binding.pry
     @studio = Studio.create(params[:studio])
     if @studio.save
       flash[:success] = "Successfully created."
@@ -65,6 +64,13 @@ class App < Sinatra::Base
     @instructors.to_json
   end
 
-
+  get '/data_dump' do
+    content_type :json
+    
+    params = AllData.generate_data_dump_params
+    data_dump = AllData.new(params)
+  
+    data_dump.to_json
+  end
 
 end
