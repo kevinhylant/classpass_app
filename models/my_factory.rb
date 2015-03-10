@@ -28,7 +28,8 @@ class MyFactory
   def self.create_and_return_scheduled_classes(clsses,instructors,num_scheduled_per_clss)
     clsses.each do |c|
       num_scheduled_per_clss.times do
-        c.scheduled_classes.create(:instructor_id => instructors[rand(instructors.count)].id)
+        params = ScheduledClass.generate_params
+        c.scheduled_classes.create(params)
       end
     end
     return ScheduledClass.all
@@ -53,7 +54,7 @@ class MyFactory
     class_ratings_count.times do
       rating_params = MyFactory.generate_rating_params
       rating = scheduled_classes[rand(scheduled_classes.size)].ratings.create(rating_params)
-      rating.assign_user(users[rand(users.size)])
+      rating.assign_user(users[rand(users.count)])
     end
   end
 
@@ -69,6 +70,7 @@ class MyFactory
       user_params = User.generate_user_params
       User.create(user_params)
     end
+    return User.all
   end
 
   def self.generate_random_nyc_zipcode
@@ -76,5 +78,18 @@ class MyFactory
     return nyc_zipcodes[rand(nyc_zipcodes.size)]
   end
   
+  def self.assign_favorite_studios(studios, users, num)
+    num.times do
+      users[rand(users.size)].favorite_studios.create(:studio_id => studios[rand(studios.size)].id)
+    end
+  end
+
+  def self.assign_user_preferences(users)
+    users.each do |u|
+      params = Preference.generate_params
+      u.create_preference(params)
+    end
+
+  end
 
 end

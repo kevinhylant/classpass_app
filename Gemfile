@@ -12,6 +12,8 @@ gem 'sinatra-flash'
 gem 'factory_girl'
 gem 'database_cleaner'
 gem 'faker'
+gem "activesupport"
+gem "chronic"
 
 group :test do
   gem 'rspec'

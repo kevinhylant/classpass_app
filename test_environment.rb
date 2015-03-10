@@ -7,4 +7,7 @@ require 'rack/test'
 require 'sinatra/base'
 require 'sinatra/reloader'
 require './app'
+require "active_support/all"
+require "chronic"
+require 'pry'
 

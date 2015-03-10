@@ -4,7 +4,6 @@ require 'sinatra/activerecord'
 require 'sinatra/flash'
 
 require 'json'
-require 'pry'
 require 'rubygems'
 
 require 'factory_girl'

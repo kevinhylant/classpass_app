@@ -8,7 +8,8 @@ class CreateClassRatings < ActiveRecord::Migration
       t.integer    :upbeat_music
       t.integer    :soreness
 
-      t.integer    :instructor_id
+      t.integer    :user_id
+      t.integer    :scheduled_class_id
 
       t.timestamps null: false
     end

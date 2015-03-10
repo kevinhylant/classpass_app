@@ -6,5 +6,6 @@ class Studio < ActiveRecord::Base
   has_many :ratings, :through => :scheduled_classes, :class_name => 'ClassRating'
   has_many :users, :through => :reservations
   has_many :times_favorited, :through => :users, :class_name => 'FavoriteStudio'
+  has_many :favorite_studios
 end
 
