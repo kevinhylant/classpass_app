@@ -1,13 +1,32 @@
+ClassPass Admin Dashboard
 
-<h1>Create a Studio</h1>
-
+<h1>Add a Studio</h1>
 <form method="POST" action="/studio">
 
-  <label for="name">Name</label>
-  <input type="text" name="name" />
-  <label for="description">Description</label>
-  <input type="text" name="description" />
+<% @studio_attributes.each do |attr| %>
+  <div>
+    <input type="text" name="studio[<%= attr %>]" placeholder=<%= attr %> />
+  </div>
+<% end %>
 
+<div>
+  <label for="instructors[names][]">Instructors</label>
+</div>
+  <% 5.times do %>
+    <div>
+      <input type="text" name="instructors[name][]" />
+    </div>
+  <% end %>
   <input type="submit" />
 
 </form>
+
+<h1>Add a Class</h1>
+  <!-- set activity types -->
+
+<h1>Add a User</h1>
+  <!-- set favorites -->
+  <!-- set preferences -->
+
+<h1>Add Instructor Rating</h1>
+  <!-- select an instructor -->
