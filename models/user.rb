@@ -1,7 +1,7 @@
 class User < ActiveRecord::Base
-  has_many  :reservations #, :dependent => :destroy
+  has_many  :reservations , :dependent => :destroy
   has_many  :clsses, :through => :reservations
-  has_many  :favorite_studios #, :dependent => :destroy
+  has_many  :favorite_studios , :dependent => :destroy
   has_many  :class_ratings
   has_one   :preference
 

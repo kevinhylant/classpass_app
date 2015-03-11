@@ -87,18 +87,12 @@ class MyFactory
 
   def self.assign_class_ratings(scheduled_classes,users,class_ratings_count)
     class_ratings_count.times do
-      rating_params = MyFactory.generate_rating_params
+      rating_params = ClassRating.generate_params
       rating = scheduled_classes[rand(scheduled_classes.size)].ratings.create(rating_params)
       rating.assign_user(users[rand(users.count)])
     end
   end
 
-  def self.generate_rating_params
-    metrics = ['star_rating','intructor_energy','sweat_level','upbeat_music','soreness']
-    rating_params = {}
-    metrics.each {|metric| rating_params[metric] = rand(5)+1}
-    return rating_params
-  end
 
   def self.create_and_return_users(num)
     num.times do

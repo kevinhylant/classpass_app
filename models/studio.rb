@@ -1,5 +1,5 @@
 class Studio < ActiveRecord::Base
-  has_many :clsses #, :dependent => :destroy
+  has_many :clsses , :dependent => :destroy
   has_many :instructors, :through => :clsses
   has_many :scheduled_classes, :through => :classes
   has_many :reservations, :through => :scheduled_classes

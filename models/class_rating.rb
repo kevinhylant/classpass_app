@@ -7,4 +7,11 @@ class ClassRating < ActiveRecord::Base
     self.save
   end
 
+  def self.generate_params
+    metrics = ['star_rating','intructor_energy','sweat_level','upbeat_music','soreness']
+    params = {}
+    metrics.each {|metric| params[metric] = rand(5)+1}
+    return params
+  end
+
 end

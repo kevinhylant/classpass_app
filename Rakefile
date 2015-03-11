@@ -16,9 +16,9 @@ namespace :db do
   end
 end
 
-desc "drop database"
+desc "destroy all database records"
 namespace :db do
-  task :drop, :environment do |t, args|
+  task :destroy_all, :environment do |t, args|
     ENV['RACK_ENV'] = args[:environment] || 'development'
     ActiveRecord::Base.subclasses.each(&:delete_all)
   end
