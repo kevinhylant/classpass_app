@@ -10,4 +10,5 @@ require './app'
 require "active_support/all"
 require "chronic"
 require 'pry'
+require "thin"
 

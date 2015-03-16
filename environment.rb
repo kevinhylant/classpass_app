@@ -8,5 +8,6 @@ require 'sinatra/reloader'
 require 'pry'
 require "active_support/all"
 require "chronic"
+require "thin"
 
 require './app'

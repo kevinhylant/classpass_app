@@ -1,6 +1,6 @@
-class CreateClsses < ActiveRecord::Migration
+class CreateKlasses < ActiveRecord::Migration
   def change
-    create_table :clsses do |t|
+    create_table :klasses do |t|
       t.string    :name
       
       t.integer   :studio_id

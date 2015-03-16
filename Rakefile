@@ -12,7 +12,7 @@ desc "seed database"
 namespace :db do
   task :seed, :environment do |t, args|
     ENV['RACK_ENV'] = args[:environment] || 'development'
-    MyFactory.seed_database('small')
+    MyFactory.new(4,30)
   end
 end
 

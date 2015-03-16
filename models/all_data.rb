@@ -1,7 +1,7 @@
 require 'pry'
 
 class AllData
-  attr_accessor :activity_types,:class_ratings,:clsses,:favorite_studios,:instructors,:preferences,:reservations,:scheduled_classes,:studios,:users
+  attr_accessor :activity_types,:class_ratings,:klasses,:favorite_studios,:instructors,:preferences,:reservations,:scheduled_classes,:studios,:users
 
   def initialize(params)
     params.each do |k,v|
@@ -13,7 +13,7 @@ class AllData
   def self.generate_data_dump_params
     models = {'activity_types' => ActivityType,
               'class_ratings'=> ClassRating,
-              'clsses'=> Clss,
+              'klasses'=> Klass,
               'favorite_studios'=> FavoriteStudio,
               'instructors'=> Instructor,
               'preferences'=> Preference,

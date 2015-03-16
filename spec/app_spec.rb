@@ -10,9 +10,9 @@ describe "Homepage" do
   end
 end
 
-describe "Instructor API Endpoint" do
+describe "Basic User Stat API Endpoint" do
   before(:each) do 
-    get '/instructors'
+    get '/basic_user_stats/721'
   end
   
   it "returns a JSON file type" do

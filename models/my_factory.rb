@@ -1,123 +1,163 @@
 class MyFactory
+  attr_reader :studio_count,:days_open_per_week, :past_days,:future_days,:days_of_data,    :klasses_per_studio,:daily_scheduled_per_klass,:user_count,:favorites_per_user,:cp_users_per_scheduled_class,:daily_scheduled_classes_per_instructor,:ratio_of_users_enabling_adv_ratings,   :daily_scheduled_classes,:scheduled_class_count,:instructor_count,:reservation_count,:class_ratings_count,:favorites_count,   :klass_count,:studios,:instructors,:klasses,:scheduled_classes,:users,:activity_types,:reservations
 
-  def self.seed_database(size)
-
-    if size == 'small'
-      studio_count = 3
-      classes_per_studio = 2
-      num_scheduled_per_clss = 2
-      instructor_count = 10
-      user_count = 30
-      scheduled_class_count = studio_count*classes_per_studio*num_scheduled_per_clss
-      class_ratings_count = 2*scheduled_class_count
-      favorites_count = user_count*2
-    elsif size == 'medium'
-      studio_count = 40
-      classes_per_studio = 3
-      num_scheduled_per_clss = 8
-      instructor_count = 60
-      user_count = 150
-      scheduled_class_count = studio_count*classes_per_studio*num_scheduled_per_clss
-      class_ratings_count = 2*scheduled_class_count
-      favorites_count = user_count*2
-    end
+  def self.activities 
     activities = ['spin','strength_training','barre','yoga','dance','pilates']
-
-    studios = MyFactory.create_and_return_studios(studio_count)
-    instructors = MyFactory.create_and_return_instructors(instructor_count)
-    clsses = MyFactory.create_and_return_clsses(studios,classes_per_studio)
-    scheduled_classes = MyFactory.create_and_return_scheduled_classes(clsses,instructors,num_scheduled_per_clss)
-    users = MyFactory.create_and_return_users(user_count)
-    activity_types = MyFactory.assign_and_return_activity_types(clsses,activities)
-    MyFactory.assign_class_ratings(scheduled_classes, users, class_ratings_count)
-    MyFactory.assign_favorite_studios(studios,users,favorites_count)
-    MyFactory.assign_user_preferences(users)
-
+    return activities
   end
 
-  def self.create_and_return_instructors(num)
-    num.times do
-      Instructor.create(:first_name => Faker::Name.first_name,
-                        :last_name => Faker::Name.last_name
-        )
-    end
-    return Instructor.all
-  end
+  def initialize(studio_count, past_days)
+    # database generation scales relative to # of studios & historical operating time
+    @studio_count  = studio_count
+    @past_days     = past_days
+    @future_days   = 7
 
-  def self.create_and_return_studios(num)
-    num.times do 
-      Studio.create(:name => "#{Faker::Name.first_name}'s Studio")
-    end
-    return Studio.all
-  end
+    @days_of_data  = (past_days+future_days)
+    
+    @klasses_per_studio        = 2
+    @favorites_per_user        = 3
+    @daily_scheduled_per_klass = 3
 
-  def self.create_and_return_clsses(studios,num_per_studio)
-    studios.each do |s|
-      num_per_studio.times do
-        s.clsses.create(:name => "Get Your Sweat On With #{Faker::Name.first_name}")
-      end
-    end
-    return Clss.all
-  end
+    @cp_users_per_scheduled_class           = 2
+    @ratio_of_users_enabling_adv_ratings    = 0.5
+    @daily_scheduled_classes_per_instructor = 5
 
-  def self.create_and_return_scheduled_classes(clsses,instructors,num_scheduled_per_clss)
-    clsses.each do |c|
-      num_scheduled_per_clss.times do
-        params = ScheduledClass.generate_params
-        c.scheduled_classes.create(params)
-      end
-    end
-    return ScheduledClass.all
-  end
+    @klass_count =            (studio_count*klasses_per_studio)
+    @daily_scheduled_classes= (studio_count*klasses_per_studio*daily_scheduled_per_klass)
+    @user_count  =            (cp_users_per_scheduled_class*daily_scheduled_classes)
+    @scheduled_class_count =  (daily_scheduled_classes*days_of_data)
+    @instructor_count =       (daily_scheduled_classes/daily_scheduled_classes_per_instructor)
+    @reservation_count =      (scheduled_class_count*cp_users_per_scheduled_class)
+    @class_ratings_count =    (reservation_count*ratio_of_users_enabling_adv_ratings).to_i
+    @favorites_count =        (user_count*favorites_per_user)
 
-  def self.assign_and_return_activity_types(clsses,activities)
-    clsses.each do |clss|
-      activities_to_assign_count = rand(2)+1
-      a1_index = rand(activities.size)    
-      activities_hash = {}
-      activities_hash[activities[a1_index]] = true
-      if activities_to_assign_count > 1
-        a2_index = (a1_index-1) 
-        activities_hash[activities[a2_index]] = true
-      end
-      clss.create_activity_type(activities_hash)
-    end
-    return ActivityType.all
-  end
-
-  def self.assign_class_ratings(scheduled_classes,users,class_ratings_count)
-    class_ratings_count.times do
-      rating_params = ClassRating.generate_params
-      rating = scheduled_classes[rand(scheduled_classes.size)].ratings.create(rating_params)
-      rating.assign_user(users[rand(users.count)])
-    end
-  end
-
-
-  def self.create_and_return_users(num)
-    num.times do
-      user_params = User.generate_user_params
-      User.create(user_params)
-    end
-    return User.all
+    self.seed_database
   end
 
   def self.generate_random_nyc_zipcode
     nyc_zipcodes = ['10001','10002','10003','10014','10016']
     return nyc_zipcodes[rand(nyc_zipcodes.size)]
   end
+
+  def self.generate_random_nyc_zipcode_and_neighborhood
+    zips = ['10001','10002','10003','10014','10016']
+    nyc_zips_and_neighborhoods = {zips[0] => 'Midtown',
+                                  zips[1] => 'LES',
+                                  zips[2] => 'NoHo',
+                                  zips[3] => 'West Village',
+                                  zips[4] => 'Murray Hill'}
+    rand_zip = zips[rand(zips.size)]
+    output = [rand_zip, nyc_zips_and_neighborhoods[rand_zip]]
+    return output
+  end
+
+
+
+# MAKE SURE ALL DATA BELOW IS NAMED PROPERLY
+# Update spec to delete replicated data, keep the lets
+# Update rake tasks
+# Test
+
+  def seed_database
+    @studios = create_and_return_studios
+    @instructors = create_and_return_instructors
+    @klasses = create_and_return_klasses
+    @scheduled_classes = create_and_return_scheduled_classes
+    @users = create_and_return_users
+    @activity_types = create_and_return_activity_types
+    @reservations = create_and_return_reservations
+
+    assign_class_ratings
+    assign_favorite_studios
+    assign_user_preferences
+
+  end
+
+
+  def create_and_return_studios
+    studio_count.times do 
+      params = Studio.generate_params 
+      Studio.create(params)
+    end
+    return Studio.all
+  end
+
+  def create_and_return_instructors
+    instructor_count.times do
+      Instructor.create(:first_name => Faker::Name.first_name,
+                        :last_name => Faker::Name.last_name)
+    end
+    return Instructor.all
+  end
   
-  def self.assign_favorite_studios(studios, users, num)
-    num.times do
-      users[rand(users.size)].favorite_studios.create(:studio_id => studios[rand(studios.size)].id)
+  def create_and_return_klasses
+    studios.each do |s|
+      klasses_per_studio.times do
+        s.klasses.create(:name => "Get Your Sweat On With #{Faker::Name.first_name}")
+      end
+    end
+    return Klass.all
+  end
+
+  def create_and_return_scheduled_classes
+    scheduled_class_count.times do
+      klass = klasses[rand(klasses.size)]      
+      params = ScheduledClass.generate_params(past_days,future_days)
+      klass.scheduled_classes.create(params)
+    end
+    return ScheduledClass.all
+  end
+
+  def create_and_return_activity_types
+    klasses.each do |klass|
+      activities = MyFactory.activities
+      activity_index = rand(activities.size) 
+      activities_params = {}
+      activities_params[activities[activity_index]] = true
+      klass.create_activity_type(activities_params)
+    end
+    return ActivityType.all
+  end
+
+  def create_and_return_users
+    user_count.times do
+      user_params = User.generate_user_params
+      User.create(user_params)
+    end
+    return User.all
+  end
+
+  def create_and_return_reservations
+    reservation_count.times do
+      params = Reservation.generate_params
+      users[rand(users.size)].reservations.create(params)
+    end
+    return Reservation.all
+  end
+  
+
+  def assign_class_ratings
+    class_ratings_count.times do
+      rating_params = ClassRating.generate_params
+      users[rand(users.size)].class_ratings.create(rating_params)
+    end
+    
+  end
+
+  def assign_favorite_studios
+    favorites_count.times do
+      users[rand(users.size)].favorite_studios.create(:studio_id => studios[rand(studio_count)].id)
     end
   end
 
-  def self.assign_user_preferences(users)
+  def assign_user_preferences
     users.each do |u|
       params = Preference.generate_params
       u.create_preference(params)
     end
   end
+
+
+
 
 end

@@ -3,41 +3,30 @@ require 'spec_helper'
 describe "Models" do
   describe "Create Associated Objects" do 
 
-    # configure MyFactory
-    studio_count = 3
-    classes_per_studio = 2
-    num_scheduled_per_clss = 2
-    instructor_count = 10
-    user_count = 30
-    scheduled_class_count = studio_count*classes_per_studio*num_scheduled_per_clss
-    class_ratings_count = 2*scheduled_class_count
-    favorites_count = user_count*2
-    activities = ['spin','strength_training','barre','yoga','dance','pilates']
-      let(:studio_count) {studio_count}
-      let(:classes_per_studio) {classes_per_studio}
-      let(:num_scheduled_per_clss) {num_scheduled_per_clss}
-      let(:instructor_count) {instructor_count}
-      let(:clss_count) {studio_count*classes_per_studio}
-      let(:user_count) {user_count}
-      let(:scheduled_class_count) {scheduled_class_count}
-      let(:activities) {activities}
-      let(:class_rating_count) {class_rating_count}
-      let(:favorites_count) {favorites_count}
-
-    studios = MyFactory.create_and_return_studios(studio_count)
-    instructors = MyFactory.create_and_return_instructors(instructor_count)
-    clsses = MyFactory.create_and_return_clsses(studios,classes_per_studio)
-    scheduled_classes = MyFactory.create_and_return_scheduled_classes(clsses,instructors,num_scheduled_per_clss)
-    users = MyFactory.create_and_return_users(user_count)
-    activity_types = MyFactory.assign_and_return_activity_types(clsses,activities)
-    MyFactory.assign_class_ratings(scheduled_classes, users, class_ratings_count)
-    MyFactory.assign_favorite_studios(studios,users,favorites_count)
-    MyFactory.assign_user_preferences(users)
+    data = MyFactory.new(1, 30)  # studios count, past days count
+    
+      let(:studio_count)           {data.studio_count}
+      let(:classes_per_studio)     {data.classes_per_studio}
+      let(:instructor_count)       {data.instructor_count}
+      let(:klass_count)            {data.klass_count}
+      let(:user_count)             {data.user_count}
+      let(:scheduled_class_count)  {data.scheduled_class_count}
+      let(:activities)             {data.activities}
+      let(:class_ratings_count)    {data.class_ratings_count}
+      let(:favorites_count)        {data.favorites_count}
+      let(:reservation_count)      {data.reservation_count}
 
 
     describe "Studios" do
+      studios = Studio.all
       it 'the correct number are persisted' do
-        expect(Studio.count).to eq(studio_count)
+        expect(studios.count).to eq(studio_count)
+      end
+      it 'has a name, description, neighborhood, and zipcode' do
+        expect(studios[rand(studio_count)].name).to_not eq(nil)
+        expect(studios[rand(studio_count)].description).to_not eq(nil)
+        expect(studios[rand(studio_count)].neighborhood).to_not eq(nil)
+        expect(studios[rand(studio_count)].zipcode).to_not eq(nil)
       end
     end
 
@@ -47,13 +36,14 @@ describe "Models" do
       end
     end
 
-    describe "Clsses" do
+    describe "Klasses" do
+      klasses = Klass.all
       it 'the correct number are persisted' do
-        expect(Clss.count).to eq(clss_count)
+        expect(klasses.count).to eq(klass_count)
       end
       it 'is associated with a studio' do
-        expect(Clss.all[rand(clss_count)].studio_id).to_not eq(nil)
-        expect(Clss.all[rand(clss_count)].studio_id).to_not eq(nil)
+        expect(klasses[rand(klass_count)].studio_id).to_not eq(nil)
+        expect(klasses[rand(klass_count)].studio_id).to_not eq(nil)
       end
       it 'has at least one activity type' do
 
@@ -70,11 +60,11 @@ describe "Models" do
         expect(scheduled_classes[rand(scheduled_class_count)].instructor_id).to_not eq(nil)
         expect(scheduled_classes[rand(scheduled_class_count)].instructor_id).to_not eq(nil)
       end
-      it 'is properly associated with an clss' do 
-        expect(scheduled_classes[rand(scheduled_class_count)].clss_id).to_not eq(nil)
+      it 'is properly associated with an klass' do 
+        expect(scheduled_classes[rand(scheduled_class_count)].klass_id).to_not eq(nil)
       end
       it 'is properly associated with an studio' do 
-        expect(scheduled_classes[rand(scheduled_class_count)].clss.studio).to_not eq(nil)
+        expect(scheduled_classes[rand(scheduled_class_count)].klass.studio).to_not eq(nil)
       end
       it 'is assigned a start_time' do
         expect(scheduled_classes[rand(scheduled_class_count)].start_time).to_not eq(nil)
@@ -88,13 +78,17 @@ describe "Models" do
     describe "Activity Type" do
       activity_types = ActivityType.all
       it 'the correct number are persisted (one per scheduled class)' do
-        expect(activity_types.count).to eq(clss_count)
+        expect(activity_types.count).to eq(klass_count)
+      end
+      it 'is properly associated with a klass' do 
+        expect(activity_types.count).to eq(klass_count)
+        expect(activity_types[rand(klass_count)].klass_id).to_not eq(nil)
       end
       it 'has at least one true value' do
-        random_1 = activity_types[rand(clss_count)]
-        random_2 = activity_types[rand(clss_count)]
+        random_1 = activity_types[rand(klass_count)]
+        random_2 = activity_types[rand(klass_count)]
         boolean_values_1,boolean_values_2 = [],[]
-        activities.each do |type| 
+        MyFactory.activities.each do |type| 
           boolean_values_1 << random_1.send(type) 
           boolean_values_2 << random_2.send(type) 
         end
@@ -143,7 +137,7 @@ describe "Models" do
       it 'Favorite studios are associated with studios' do
         expect(favorite_studios[rand(favorites_count)].studio_id).to_not eq(nil)
       end
-
+      
     end
 
     describe 'Preference' do 
@@ -156,6 +150,25 @@ describe "Models" do
       end
       
     end
+
+    describe 'Reservations' do
+      reservations = Reservation.all
+      it 'The correct number are persisted ' do
+        expect(reservations.size).to eq(reservation_count)
+      end
+      it 'Reservations are associated with users' do
+        expect(reservations[rand(reservation_count)].user_id).to_not eq(nil)
+      end
+      it 'Reservations are associated with scheduled classes' do
+        expect(reservations[rand(reservation_count)].scheduled_class_id).to_not eq(nil)
+      end
+      it 'Reservations are associated with klasses' do
+        expect(reservations[rand(reservation_count)].klass_id).to_not eq(nil)
+      end
+
+    end
+
+
 
   end
 end

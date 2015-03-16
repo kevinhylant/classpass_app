@@ -8,7 +8,7 @@ class CreateActivityTypes < ActiveRecord::Migration
       t.boolean    :dance
       t.boolean    :pilates
 
-      t.integer    :clss_id
+      t.integer    :klass_id
     
       t.timestamps null: false
     end

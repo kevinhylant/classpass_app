@@ -1,7 +1,10 @@
 class User < ActiveRecord::Base
   has_many  :reservations , :dependent => :destroy
-  has_many  :clsses, :through => :reservations
+  has_many  :klasses, :through => :reservations
   has_many  :favorite_studios , :dependent => :destroy
+  has_many  :scheduled_classes, :through => :reservations
+  has_many  :klasses, :through => :scheduled_classes
+  has_many  :activity_types, :through => :klasses
   has_many  :class_ratings
   has_one   :preference
 
@@ -19,4 +22,49 @@ class User < ActiveRecord::Base
     return user_params
   end
 
+  def past_activities_breakdown(num_of_days=30)
+    today = DateTime.now
+    timeframe = num_of_days.days
+    breakdown = {}
+    breakdown['total'] = 0
+    self.reservations.each do |res|
+      class_time = res.scheduled_class.start_time
+      if class_time <= today && class_time >= (today - timeframe)
+        activity = res.activity_type.return_activity_type
+        breakdown[activity] ||= 0
+        breakdown[activity] += 1
+        breakdown['total'] += 1
+      end
+    end
+
+    return breakdown
+  end
+
+  def past_activities_breakdown_by_number(num_of_days=30)
+    return past_activities_breakdown(num_of_days)
+  end
+
+  def past_activities_breakdown_by_ratio(num_of_days=30)
+    breakdown_by_num = past_activities_breakdown(num_of_days)
+    past_classes_count = breakdown_by_num['total']
+    percentage_breakdown = {}
+
+    breakdown_by_num.each do |activity,num|
+      percentage_breakdown[activity] = ((num.to_f/past_classes_count)*100).round(2) if activity != 'total'
+    end
+    return percentage_breakdown
+  end
+
+  def upcoming_classes
+    scheduled_classes = self.scheduled_classes
+    upcoming_classes = scheduled_classes.select { |sc| sc.start_time > Time.now }
+    return upcoming_classes
+  end
+
 end
+
+
+
+
+
+

@@ -44,27 +44,45 @@ class App < Sinatra::Base
   #   user.destroy
   # end
 
-  post "/studio" do
-    @studio = Studio.create(params[:studio])
-    if @studio.save
-      flash[:success] = "Successfully created."
-      redirect to "/studios/#{@studio.id}"
-    end
-  end
-
-  get '/studios/:id' do
-    @studio = Studio.find(params[:id])
-    erb :studio_show
-  end
-
-  get '/instructors' do
+  ######## API ENDPOINTS START ########
+  get '/basic_user_stats/:id' do
     content_type :json
-    @instructors = Instructor.all(:order => :last_name)
-
-    @instructors.to_json
+    user = User.find(params[:id])
+    scheduled_classes = user.scheduled_classes
+    completed_count, upcoming_count = 0, 0
+    scheduled_classes.each do |sc|
+      sc.start_time < Time.now ? completed_count += 1 : upcoming_count += 1
+    end
+    @basic_user_stats = {:upcoming_count => upcoming_count,
+                         :completed_count => completed_count}
+    @basic_user_stats.to_json
+        # @instructors = Instructor.all(:order => :last_name)
   end
 
-  get '/data_dump' do
+  get '/user_activities_breakdown/:id' do 
+    content_type :json
+    user = User.find(params[:id])
+    @user_activities = user.past_activities_breakdown_by_ratio
+    @user_activities.to_json
+  end
+
+  get '/user_upcoming_classes/:id' do 
+    content_type :json
+    user = User.find(params[:id])
+    upcoming_classes_unformatted = user.upcoming_classes
+    @upcoming_classes = {}
+    @upcoming_classes_arr = []
+    upcoming_classes_unformatted.each do |uc|
+      @upcoming_classes['weekday_num'] = uc.start_time.wday
+      @upcoming_classes['class_time']  = uc.start_time.strftime("%H:%M")
+      @upcoming_classes['studio_name']  = uc.klass.name
+      @upcoming_classes['neighborhood']  = uc.studio.neighborhood
+      @upcoming_classes_arr << @upcoming_classes.clone
+    end
+    @upcoming_classes_arr.to_json
+  end
+
+  get '/data_dump' do  # ALL DATA
     content_type :json
     
     params = AllData.generate_data_dump_params
@@ -72,5 +90,7 @@ class App < Sinatra::Base
   
     data_dump.to_json
   end
+
+  ######## API ENDPOINTS END ########
 
 end
