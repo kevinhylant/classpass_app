@@ -34,53 +34,48 @@ class App < Sinatra::Base
     erb :home
   end
 
-  # get "/studios" do
-  #   @studios = Studio.all
-  #   erb :studio
-  # end
-
-  # get "/delete/elaine" do
-  #   user = User.find_by_username "elaine"
-  #   user.destroy
-  # end
 
   ######## API ENDPOINTS START ########
-  get '/basic_user_stats/:id' do
+  # http://example.com/view_widgets
+  # http://example.com/create_new_widget?name=Widgetizer
+  # http://example.com/update_widget?id=123&name=Foo
+  # http://example.com/delete_widget?id=123
+
+
+  
+  # # create
+  # post '/widgets' do
+  #   widget = Widget.new(params['widget'])
+  #   widget.save
+  #   status 201
+  # end
+
+  # # update
+  # put '/widgets/:id' do
+  #   widget = Widget.find(params[:id])
+  #   return status 404 if widget.nil?
+  #   widget.update(params[:widget])
+  #   widget.save
+  #   status 202
+  # end
+
+  get '/api/users/:id/classes/completed' do 
     content_type :json
     user = User.find(params[:id])
-    scheduled_classes = user.scheduled_classes
-    completed_count, upcoming_count = 0, 0
-    scheduled_classes.each do |sc|
-      sc.start_time < Time.now ? completed_count += 1 : upcoming_count += 1
-    end
-    @basic_user_stats = {:upcoming_count => upcoming_count,
-                         :completed_count => completed_count}
-    @basic_user_stats.to_json
-        # @instructors = Instructor.all(:order => :last_name)
+    completed_classes = user.return_classes('completed')
+    @classes_and_associated_objects = completed_classes.collect {|cc| cc.return_self_and_associated_objects} 
+    @classes_and_associated_objects.to_json
   end
 
-  get '/user_activities_breakdown/:id' do 
+
+  get '/api/users/:id/classes/upcoming' do 
     content_type :json
     user = User.find(params[:id])
-    @user_activities = user.past_activities_breakdown_by_ratio
-    @user_activities.to_json
+    upcoming_classes = user.return_classes('upcoming')
+    @classes_and_associated_objects = upcoming_classes.collect {|uc| uc.return_self_and_associated_objects} 
+    @classes_and_associated_objects.to_json
   end
 
-  get '/user_upcoming_classes/:id' do 
-    content_type :json
-    user = User.find(params[:id])
-    upcoming_classes_unformatted = user.upcoming_classes
-    @upcoming_classes = {}
-    @upcoming_classes_arr = []
-    upcoming_classes_unformatted.each do |uc|
-      @upcoming_classes['weekday_num'] = uc.start_time.wday
-      @upcoming_classes['class_time']  = uc.start_time.strftime("%H:%M")
-      @upcoming_classes['studio_name']  = uc.klass.name
-      @upcoming_classes['neighborhood']  = uc.studio.neighborhood
-      @upcoming_classes_arr << @upcoming_classes.clone
-    end
-    @upcoming_classes_arr.to_json
-  end
 
   get '/data_dump' do  # ALL DATA
     content_type :json

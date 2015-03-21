@@ -8,12 +8,10 @@ class ScheduledClass < ActiveRecord::Base
   has_one     :studio, :through => :klass
 
   def self.generate_params(past_days,future_days)
-    instructors = Instructor.all
-    instructor_id = instructors[rand(instructors.count)].id
     time_of_class = ScheduledClass.generate_random_class_time(past_days,future_days)
     params = {}
-    params[:instructor_id] = instructor_id
     params[:start_time] = time_of_class
+    params[:instructor_id] = Instructor.all.sample(1)[0].id
     return params
   end
 
@@ -43,6 +41,14 @@ class ScheduledClass < ActiveRecord::Base
       time_of_class = Chronic.parse("#{hour} #{tense} #{weekday} at #{hour}:#{minute}")
     end    
     return time_of_class
+  end
+
+  def return_self_and_associated_objects
+    class_hash = JSON.parse(self.to_json)   
+    class_hash["scheduled_class"]['klass'] = JSON.parse(self.klass.to_json)['klass']
+    class_hash["scheduled_class"]['studio'] = JSON.parse(self.studio.to_json)['studio']
+    class_hash["scheduled_class"]['activity_type'] = JSON.parse(self.activity_type.to_json)['activity_type']
+    return class_hash["scheduled_class"]
   end
 
 end

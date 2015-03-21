@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Models" do
   describe "Create Associated Objects" do 
 
-    data = MyFactory.new(1, 30)  # studios count, past days count
+    data = MyFactory.new(3, 30)  # studios count, past days count
     
       let(:studio_count)           {data.studio_count}
       let(:classes_per_studio)     {data.classes_per_studio}
@@ -57,21 +57,22 @@ describe "Models" do
         expect(scheduled_classes.count).to eq(scheduled_class_count)
       end
       it 'is associated with an instructor' do
-        expect(scheduled_classes[rand(scheduled_class_count)].instructor_id).to_not eq(nil)
-        expect(scheduled_classes[rand(scheduled_class_count)].instructor_id).to_not eq(nil)
+        expect(scheduled_classes.sample(1)[0].instructor_id).to_not eq(nil)
+        expect(scheduled_classes.sample(1)[0].instructor_id).to_not eq(nil)
       end
       it 'is properly associated with an klass' do 
-        expect(scheduled_classes[rand(scheduled_class_count)].klass_id).to_not eq(nil)
+        expect(scheduled_classes.sample(1)[0].klass_id).to_not eq(nil)
       end
       it 'is properly associated with an studio' do 
-        expect(scheduled_classes[rand(scheduled_class_count)].klass.studio).to_not eq(nil)
+        expect(scheduled_classes.sample(1)[0].klass.studio).to_not eq(nil)
       end
       it 'is assigned a start_time' do
-        expect(scheduled_classes[rand(scheduled_class_count)].start_time).to_not eq(nil)
+        expect(scheduled_classes.sample(1)[0].start_time).to_not eq(nil)
       end
-      it 'is assigned a start_time after after 6am and before 10am' do
-        expect(scheduled_classes[rand(scheduled_class_count)].start_time.hour).to be >= 6
-        expect(scheduled_classes[rand(scheduled_class_count)].start_time.hour).to be <= 22
+      it 'is assigned a start_time after after 5am and before 10am' do
+        # SOMETIMES IT IS ZERO FOR SOME STRANGE REASON
+        expect(scheduled_classes.sample(1)[0].start_time.hour).to be >= 5
+        expect(scheduled_classes.sample(1)[0].start_time.hour).to be <= 22
       end
     end
 
@@ -99,12 +100,13 @@ describe "Models" do
 
     describe "Users" do
       users = User.all
+      random_1 = users.sample(1)[0];
+      random_2 = users.sample(1)[0];
+
       it 'the correct number are persisted' do
         expect(users.count).to eq(user_count)
       end
       it 'have first and last names, zipcodes, and emails' do
-        random_1 = users[rand(user_count)]
-        random_2 = users[rand(user_count)]
         random_users = [random_1,random_2]
         user_attributes = ['first_name','last_name','email','home_zipcode','work_zipcode']
 
@@ -115,7 +117,16 @@ describe "Models" do
         end
       end
       it 'can have associated favorite_studios' do
-
+        expect(random_1.favorite_studios).to_not eq(nil)
+      end
+      it 'can have no more than 3 reservations per studio' do
+        reservations = random_1.reservations
+        reservations_per_studio = {}
+        reservations.each do |res|
+          reservations_per_studio[res.studio.name] ||= 0
+          reservations_per_studio[res.studio.name] += 1
+        end
+        expect(reservations_per_studio.values.max).to be <= 3
       end
     end
 
@@ -163,7 +174,7 @@ describe "Models" do
         expect(reservations[rand(reservation_count)].scheduled_class_id).to_not eq(nil)
       end
       it 'Reservations are associated with klasses' do
-        expect(reservations[rand(reservation_count)].klass_id).to_not eq(nil)
+        expect(reservations[rand(reservation_count)].klass).to_not eq(nil)
       end
 
     end

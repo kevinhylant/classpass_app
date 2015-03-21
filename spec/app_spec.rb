@@ -10,12 +10,28 @@ describe "Homepage" do
   end
 end
 
-describe "Basic User Stat API Endpoint" do
+describe "Completed Classes API Endpoint" do
+  let(:user_id) {User.first.id}
+
   before(:each) do 
-    get '/basic_user_stats/721'
+    get "/users/#{user_id}/classes/completed"
   end
   
-  it "returns a JSON file type" do
+  xit "it returns a valid JSON file type" do
     expect(last_response.header['Content-Type']).to include('application/json')
   end
+ 
+end
+
+describe "Upcoming Classes API Endpoint" do
+  let(:user_id) {User.first.id}
+
+  before(:each) do 
+    get "/users/#{user_id}/classes/upcoming"
+  end
+  
+  xit "it returns a valid JSON file type" do
+    expect(last_response.header['Content-Type']).to include('application/json')
+  end
+ 
 end

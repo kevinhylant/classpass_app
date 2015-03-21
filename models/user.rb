@@ -55,10 +55,12 @@ class User < ActiveRecord::Base
     return percentage_breakdown
   end
 
-  def upcoming_classes
-    scheduled_classes = self.scheduled_classes
-    upcoming_classes = scheduled_classes.select { |sc| sc.start_time > Time.now }
-    return upcoming_classes
+  def return_classes(state)
+    classes = self.scheduled_classes.select do |sc| 
+      state == 'upcoming' ? sc.start_time > Time.now : sc.start_time < Time.now
+    end
+    classes.sort! { |a,b| a.start_time <=> b.start_time}
+    return classes
   end
 
 end

@@ -1,5 +1,5 @@
 class MyFactory
-  attr_reader :studio_count,:days_open_per_week, :past_days,:future_days,:days_of_data,    :klasses_per_studio,:daily_scheduled_per_klass,:user_count,:favorites_per_user,:cp_users_per_scheduled_class,:daily_scheduled_classes_per_instructor,:ratio_of_users_enabling_adv_ratings,   :daily_scheduled_classes,:scheduled_class_count,:instructor_count,:reservation_count,:class_ratings_count,:favorites_count,   :klass_count,:studios,:instructors,:klasses,:scheduled_classes,:users,:activity_types,:reservations
+  attr_reader :studio_count,:days_open_per_week, :past_days,:future_days,:days_of_data,    :klasses_per_studio,:daily_scheduled_per_klass,:user_count,:avg_favorites_per_user,:cp_users_per_studio,:cp_users_per_scheduled_class,:daily_scheduled_classes_per_instructor,:ratio_of_rated_classes,   :daily_scheduled_classes,:avg_daily_reservations_per_user,:avg_reservations_per_user,:scheduled_class_count,:instructor_count,:reservation_count,:class_ratings_count,:favorites_count,   :klass_count,:studios,:instructors,:klasses,:scheduled_classes,:users,:activity_types,:reservations
 
   def self.activities 
     activities = ['spin','strength_training','barre','yoga','dance','pilates']
@@ -15,21 +15,24 @@ class MyFactory
     @days_of_data  = (past_days+future_days)
     
     @klasses_per_studio        = 2
-    @favorites_per_user        = 3
-    @daily_scheduled_per_klass = 3
+    @avg_favorites_per_user    = 3
+    @daily_scheduled_per_klass = 2
 
-    @cp_users_per_scheduled_class           = 2
-    @ratio_of_users_enabling_adv_ratings    = 0.5
-    @daily_scheduled_classes_per_instructor = 5
+    @cp_users_per_studio                    = 20
+    @ratio_of_rated_classes                 = 0.5
+    @daily_scheduled_classes_per_instructor = 4
 
+    @avg_daily_reservations_per_user = (3/30.0)
+
+    @avg_reservations_per_user = (avg_daily_reservations_per_user*days_of_data)
+    @user_count  =            (cp_users_per_studio*studio_count)
+    @reservation_count =      (avg_reservations_per_user*user_count).to_i
+    @scheduled_class_count =  (reservation_count)
     @klass_count =            (studio_count*klasses_per_studio)
-    @daily_scheduled_classes= (studio_count*klasses_per_studio*daily_scheduled_per_klass)
-    @user_count  =            (cp_users_per_scheduled_class*daily_scheduled_classes)
-    @scheduled_class_count =  (daily_scheduled_classes*days_of_data)
+    @daily_scheduled_classes= (scheduled_class_count/days_of_data)
     @instructor_count =       (daily_scheduled_classes/daily_scheduled_classes_per_instructor)
-    @reservation_count =      (scheduled_class_count*cp_users_per_scheduled_class)
-    @class_ratings_count =    (reservation_count*ratio_of_users_enabling_adv_ratings).to_i
-    @favorites_count =        (user_count*favorites_per_user)
+    @class_ratings_count =    (reservation_count*ratio_of_rated_classes).to_i
+    @favorites_count =        (user_count*avg_favorites_per_user)
 
     self.seed_database
   end
@@ -60,17 +63,15 @@ class MyFactory
 
   def seed_database
     @studios = create_and_return_studios
-    @instructors = create_and_return_instructors
     @klasses = create_and_return_klasses
+    @instructors = create_and_return_instructors
     @scheduled_classes = create_and_return_scheduled_classes
     @users = create_and_return_users
     @activity_types = create_and_return_activity_types
     @reservations = create_and_return_reservations
-
     assign_class_ratings
     assign_favorite_studios
     assign_user_preferences
-
   end
 
 
@@ -82,14 +83,6 @@ class MyFactory
     return Studio.all
   end
 
-  def create_and_return_instructors
-    instructor_count.times do
-      Instructor.create(:first_name => Faker::Name.first_name,
-                        :last_name => Faker::Name.last_name)
-    end
-    return Instructor.all
-  end
-  
   def create_and_return_klasses
     studios.each do |s|
       klasses_per_studio.times do
@@ -107,7 +100,15 @@ class MyFactory
     end
     return ScheduledClass.all
   end
-
+ 
+  def create_and_return_instructors
+    instructor_count.times do
+      Instructor.create(:first_name => Faker::Name.first_name,
+                        :last_name => Faker::Name.last_name)
+    end
+    return Instructor.all
+  end
+   
   def create_and_return_activity_types
     klasses.each do |klass|
       activities = MyFactory.activities
@@ -130,9 +131,36 @@ class MyFactory
   def create_and_return_reservations
     reservation_count.times do
       params = Reservation.generate_params
-      users[rand(users.size)].reservations.create(params)
+      associated_scheduled_class = ScheduledClass.find(params[:scheduled_class_id])
+      user = pick_compatible_user(associated_scheduled_class)
+      user.reservations.create(params)
     end
     return Reservation.all
+  end
+
+  def pick_compatible_user(associated_scheduled_class)
+    studio_name = associated_scheduled_class.studio.name
+    i = 1
+    while (i != 0)    
+      user = User.all.sample(1)[0]
+      reservations = user.reservations
+      reservations_per_studio = {}
+      reservations.each do |res|
+        reservations_per_studio[res.studio.name] ||= 0
+        reservations_per_studio[res.studio.name] += 1
+      end
+      if reservations_per_studio[studio_name] == nil || reservations_per_studio[studio_name] < 3
+        i = 0 
+      else
+        i += 1
+      end
+
+      first_reservation ||= Reservation.first if Reservation.first
+      puts "PRINTING RESERVATION WITH ID #{Reservation.last.id}" if first_reservation
+      puts "PRINTING #{i} TIMES"
+      binding.pry if i >= users.count
+    end
+    return user
   end
   
 
