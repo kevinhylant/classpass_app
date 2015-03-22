@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Models" do
   describe "Create Associated Objects" do 
 
-    data = MyFactory.new(3, 30)  # studios count, past days count
+    data = MyFactory.new(3, 1,  30)  # studios count, weekly user reservations, past days count
     
       let(:studio_count)           {data.studio_count}
       let(:classes_per_studio)     {data.classes_per_studio}
@@ -19,6 +19,7 @@ describe "Models" do
 
     describe "Studios" do
       studios = Studio.all
+      binding.pry
       it 'the correct number are persisted' do
         expect(studios.count).to eq(studio_count)
       end

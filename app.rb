@@ -59,21 +59,54 @@ class App < Sinatra::Base
   #   status 202
   # end
 
+  get '/api/users/sample-user' do
+    content_type :json
+    user = User.all.sample(1)[0]
+    @user = user.return_self_and_preferences
+    @user.to_json
+  end
+
   get '/api/users/:id/classes/completed' do 
     content_type :json
     user = User.find(params[:id])
     completed_classes = user.return_classes('completed')
-    @classes_and_associated_objects = completed_classes.collect {|cc| cc.return_self_and_associated_objects} 
-    @classes_and_associated_objects.to_json
+    @completed_classes = completed_classes.collect {|cc| cc.return_self_and_associated_objects} 
+    @completed_classes.to_json
   end
-
 
   get '/api/users/:id/classes/upcoming' do 
     content_type :json
     user = User.find(params[:id])
     upcoming_classes = user.return_classes('upcoming')
-    @classes_and_associated_objects = upcoming_classes.collect {|uc| uc.return_self_and_associated_objects} 
-    @classes_and_associated_objects.to_json
+    @upcoming_classes = upcoming_classes.collect {|uc| uc.return_self_and_associated_objects} 
+    @upcoming_classes.to_json
+  end
+
+  get '/api/studios' do
+    content_type :json
+    studios = Studio.all
+    @studios = studios.collect {|studio| studio.return_self_and_associated_objects} 
+    @studios.to_json
+  end
+
+  get '/api/studio/:id/average_rating' do
+    content_type :json
+    studio = Studio.find(params[:id])
+    ratings_count = 0
+    scheduled_classes = studio.scheduled_classes
+    stars_array = scheduled_classes.collect do |sc| 
+      ratings = sc.ratings
+      
+      sc_ratings_array = ratings.collect { |rating| rating.star_rating }
+      sc_ratings_array.compact!
+      ratings_count += sc_ratings_array.size
+      sc_star_total = sc_ratings_array.inject(:+)
+      sc_star_total
+    end
+    stars_array.compact!
+    stars_total = stars_array.inject(:+).to_f
+    @avg_star_rating = (stars_total/ratings_count).round(2)
+    @avg_star_rating.to_json
   end
 
 

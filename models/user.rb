@@ -63,6 +63,14 @@ class User < ActiveRecord::Base
     return classes
   end
 
+  def return_self_and_preferences
+    user_hash = {}
+    user_hash = JSON.parse(self.to_json)['user']
+    preference = self.preference
+    user_hash['preferences'] = JSON.parse(preference.to_json)['preference']
+    return user_hash
+  end
+
 end
 
 

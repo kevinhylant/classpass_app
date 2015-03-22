@@ -6,8 +6,8 @@ class MyFactory
     return activities
   end
 
-  def initialize(studio_count, past_days)
-    # database generation scales relative to # of studios & historical operating time
+  def initialize(studio_count,weekly_reservations_per_user, past_days)
+    # database generation scales relative to # of studios, reservations per user per week, & historical operating time
     @studio_count  = studio_count
     @past_days     = past_days
     @future_days   = 7
@@ -22,7 +22,7 @@ class MyFactory
     @ratio_of_rated_classes                 = 0.5
     @daily_scheduled_classes_per_instructor = 4
 
-    @avg_daily_reservations_per_user = (3/30.0)
+    @avg_daily_reservations_per_user = (weekly_reservations_per_user/7.0)
 
     @avg_reservations_per_user = (avg_daily_reservations_per_user*days_of_data)
     @user_count  =            (cp_users_per_studio*studio_count)
@@ -79,7 +79,7 @@ class MyFactory
     studio_count.times do 
       params = Studio.generate_params 
       Studio.create(params)
-    end
+    end    
     return Studio.all
   end
 
