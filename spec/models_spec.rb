@@ -19,7 +19,6 @@ describe "Models" do
 
     describe "Studios" do
       studios = Studio.all
-      binding.pry
       it 'the correct number are persisted' do
         expect(studios.count).to eq(studio_count)
       end
