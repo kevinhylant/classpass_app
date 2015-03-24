@@ -12,10 +12,10 @@ require 'faker'
 require './environment.rb'
 
 Dir["./models/*.rb"].each {|file| require file }
-# Dir["./spec/factories/*.rb"].each {|file| require file }
 
 db_options = {adapter: 'sqlite3', database: './db/cp_dev_db'}
 ActiveRecord::Base.establish_connection(db_options)
+
 
 class App < Sinatra::Base
   register Sinatra::ActiveRecordExtension
@@ -36,28 +36,6 @@ class App < Sinatra::Base
 
 
   ######## API ENDPOINTS START ########
-  # http://example.com/view_widgets
-  # http://example.com/create_new_widget?name=Widgetizer
-  # http://example.com/update_widget?id=123&name=Foo
-  # http://example.com/delete_widget?id=123
-
-
-  
-  # # create
-  # post '/widgets' do
-  #   widget = Widget.new(params['widget'])
-  #   widget.save
-  #   status 201
-  # end
-
-  # # update
-  # put '/widgets/:id' do
-  #   widget = Widget.find(params[:id])
-  #   return status 404 if widget.nil?
-  #   widget.update(params[:widget])
-  #   widget.save
-  #   status 202
-  # end
 
   get '/api/users/sample-user' do
     content_type :json

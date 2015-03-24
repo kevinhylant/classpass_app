@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Models" do
   describe "Create Associated Objects" do 
 
-    data = MyFactory.new(3, 1,  30)  # studios count, weekly user reservations, past days count
+    data = MyFactory.new(3, 1, 30)  # studios count, weekly user reservations, past days count
     
       let(:studio_count)           {data.studio_count}
       let(:classes_per_studio)     {data.classes_per_studio}
@@ -70,7 +70,6 @@ describe "Models" do
         expect(scheduled_classes.sample(1)[0].start_time).to_not eq(nil)
       end
       it 'is assigned a start_time after after 5am and before 10am' do
-        # SOMETIMES IT IS ZERO FOR SOME STRANGE REASON
         expect(scheduled_classes.sample(1)[0].start_time.hour).to be >= 5
         expect(scheduled_classes.sample(1)[0].start_time.hour).to be <= 22
       end

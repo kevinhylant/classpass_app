@@ -56,11 +56,6 @@ class MyFactory
 
 
 
-# MAKE SURE ALL DATA BELOW IS NAMED PROPERLY
-# Update spec to delete replicated data, keep the lets
-# Update rake tasks
-# Test
-
   def seed_database
     @studios = create_and_return_studios
     @klasses = create_and_return_klasses
